@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	monzoAuthURL  = "https://auth.monzo.com"
-	monzoTokenURL = "https://api.monzo.com/oauth2/token"
+	monzoAuthURL    = "https://auth.monzo.com"
+	monzoAPIBaseURL = "https://api.monzo.com"
+	monzoTokenURL   = monzoAPIBaseURL + "/oauth2/token"
 
 	// Timeout durations
 	authTimeout           = 5 * time.Minute

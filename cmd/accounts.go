@@ -14,8 +14,7 @@ import (
 )
 
 const (
-	monzoAPIBaseURL = "https://api.monzo.com"
-	apiTimeout      = 30 * time.Second
+	apiTimeout = 30 * time.Second
 )
 
 // Account represents a Monzo account
@@ -110,6 +109,8 @@ func fetchAccounts(accessToken string) (*AccountsResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		// Error from ReadAll is intentionally ignored as we're in an error path
+		// and want to include whatever body content we can read in the error message
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
