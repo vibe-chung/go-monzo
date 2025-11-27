@@ -20,6 +20,11 @@ import (
 const (
 	monzoAuthURL  = "https://auth.monzo.com"
 	monzoTokenURL = "https://api.monzo.com/oauth2/token"
+
+	// Timeout durations
+	authTimeout          = 5 * time.Minute
+	tokenExchangeTimeout = 30 * time.Second
+	serverShutdownTimeout = 5 * time.Second
 )
 
 var (
@@ -88,7 +93,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to start local server: %w", err)
 	}
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), serverShutdownTimeout)
 		defer cancel()
 		_ = server.Shutdown(ctx)
 	}()
@@ -113,7 +118,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		// Success
 	case err := <-errChan:
 		return fmt.Errorf("authorization failed: %w", err)
-	case <-time.After(5 * time.Minute):
+	case <-time.After(authTimeout):
 		return fmt.Errorf("authorization timed out")
 	}
 
@@ -200,7 +205,7 @@ func exchangeCodeForToken(clientID, clientSecret, redirectURI, code string) (*To
 		"code":          {code},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), tokenExchangeTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "POST", monzoTokenURL, strings.NewReader(data.Encode()))
