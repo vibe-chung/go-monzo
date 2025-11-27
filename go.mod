@@ -1,6 +1,6 @@
 module github.com/vibe-chung/go-monzo
 
-go 1.24.10
+go 1.25.4
 
 require github.com/spf13/cobra v1.8.1
 
