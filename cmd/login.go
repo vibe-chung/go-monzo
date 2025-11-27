@@ -22,8 +22,8 @@ const (
 	monzoTokenURL = "https://api.monzo.com/oauth2/token"
 
 	// Timeout durations
-	authTimeout          = 5 * time.Minute
-	tokenExchangeTimeout = 30 * time.Second
+	authTimeout           = 5 * time.Minute
+	tokenExchangeTimeout  = 30 * time.Second
 	serverShutdownTimeout = 5 * time.Second
 )
 
