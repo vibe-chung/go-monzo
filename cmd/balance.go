@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -72,8 +73,8 @@ func fetchBalance(accessToken, accountID string) (*BalanceResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), apiTimeout)
 	defer cancel()
 
-	url := fmt.Sprintf("%s/balance?account_id=%s", monzoAPIBaseURL, accountID)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	reqURL := fmt.Sprintf("%s/balance?account_id=%s", monzoAPIBaseURL, url.QueryEscape(accountID))
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
 	if err != nil {
 		return nil, err
 	}
