@@ -105,7 +105,7 @@ func fetchTransactions(accessToken, accountID string) (*TransactionsResponse, er
 	ctx, cancel := context.WithTimeout(context.Background(), apiTimeout)
 	defer cancel()
 
-	reqURL := fmt.Sprintf("%s/transactions?account_id=%s", monzoAPIBaseURL, url.QueryEscape(accountID))
+	reqURL := fmt.Sprintf("%s/transactions?expand[]=merchant&account_id=%s", monzoAPIBaseURL, url.QueryEscape(accountID))
 	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
 	if err != nil {
 		return nil, err
