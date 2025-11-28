@@ -51,6 +51,35 @@ This will:
 
 **Note:** After initial authorization, you may need to approve access in the Monzo app for full API permissions.
 
+### Accounts
+
+List all accounts associated with the authenticated user:
+
+```bash
+go-monzo accounts
+```
+
+This returns a JSON response with account information. Use the `id` field from the response as the `account_id` for other commands.
+
+### Balance
+
+Get the balance of a specific account:
+
+```bash
+# Using flags
+go-monzo balance --account-id=YOUR_ACCOUNT_ID
+
+# Using environment variables
+export MONZO_ACCOUNT_ID=your_account_id
+go-monzo balance
+```
+
+This returns a JSON response with balance information including:
+- `balance` - Current balance in minor units (e.g., pence)
+- `total_balance` - Total balance including pots
+- `currency` - ISO currency code (e.g., "GBP")
+- `spend_today` - Amount spent today in minor units
+
 ## Configuration
 
 The CLI stores tokens in `~/.go-monzo/token.json`.
@@ -58,6 +87,7 @@ The CLI stores tokens in `~/.go-monzo/token.json`.
 Environment variables:
 - `MONZO_CLIENT_ID` - Your OAuth client ID
 - `MONZO_CLIENT_SECRET` - Your OAuth client secret
+- `MONZO_ACCOUNT_ID` - Your Monzo account ID (for balance command)
 
 ## License
 
