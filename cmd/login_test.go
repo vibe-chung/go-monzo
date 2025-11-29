@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -318,28 +319,15 @@ func TestBuildAuthURL(t *testing.T) {
 	}
 
 	// Check for required parameters
-	if !contains(authURL, "client_id=test_client_id") {
+	if !strings.Contains(authURL, "client_id=test_client_id") {
 		t.Error("Auth URL missing client_id parameter")
 	}
 
-	if !contains(authURL, "response_type=code") {
+	if !strings.Contains(authURL, "response_type=code") {
 		t.Error("Auth URL missing response_type parameter")
 	}
 
-	if !contains(authURL, "redirect_uri=") {
+	if !strings.Contains(authURL, "redirect_uri=") {
 		t.Error("Auth URL missing redirect_uri parameter")
 	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
