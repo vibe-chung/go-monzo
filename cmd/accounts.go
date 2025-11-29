@@ -94,12 +94,11 @@ func loadToken() (*TokenResponse, error) {
 			return nil, fmt.Errorf("token expired and no refresh token available")
 		}
 
-		// Get client credentials from environment
-		clientID := os.Getenv("MONZO_CLIENT_ID")
-		clientSecret := os.Getenv("MONZO_CLIENT_SECRET")
+		// Get client credentials with fallback to config file
+		clientID, clientSecret := GetClientCredentials("", "")
 
 		if clientID == "" || clientSecret == "" {
-			return nil, fmt.Errorf("token expired: please set MONZO_CLIENT_ID and MONZO_CLIENT_SECRET environment variables to refresh, or run 'go-monzo login' again")
+			return nil, fmt.Errorf("token expired: please set MONZO_CLIENT_ID and MONZO_CLIENT_SECRET environment variables, add them to config file (~/.go-monzo/config.json), or run 'go-monzo login' again")
 		}
 
 		fmt.Println("Token expired, refreshing...")

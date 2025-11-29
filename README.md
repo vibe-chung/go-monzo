@@ -40,6 +40,9 @@ go-monzo login --client-id=YOUR_CLIENT_ID --client-secret=YOUR_CLIENT_SECRET
 export MONZO_CLIENT_ID=your_client_id
 export MONZO_CLIENT_SECRET=your_client_secret
 go-monzo login
+
+# Using config file (see Configuration section)
+go-monzo login
 ```
 
 This will:
@@ -84,7 +87,27 @@ This returns a JSON response with balance information including:
 
 The CLI stores tokens in `~/.go-monzo/token.json`.
 
-Environment variables:
+### Config File
+
+You can store your OAuth credentials in a config file at `~/.go-monzo/config.json`:
+
+```json
+{
+  "client_id": "your_client_id",
+  "client_secret": "your_client_secret"
+}
+```
+
+### Credential Priority
+
+Credentials are resolved in the following order (highest to lowest priority):
+
+1. Command line flags (`--client-id`, `--client-secret`)
+2. Environment variables (`MONZO_CLIENT_ID`, `MONZO_CLIENT_SECRET`)
+3. Config file (`~/.go-monzo/config.json`)
+
+### Environment Variables
+
 - `MONZO_CLIENT_ID` - Your OAuth client ID
 - `MONZO_CLIENT_SECRET` - Your OAuth client secret
 - `MONZO_ACCOUNT_ID` - Your Monzo account ID (for balance command)

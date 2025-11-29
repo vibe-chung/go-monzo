@@ -78,12 +78,15 @@ func init() {
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
+	// Get client credentials with fallback to config file
+	clientID, clientSecret = GetClientCredentials(clientID, clientSecret)
+
 	if clientID == "" {
-		return fmt.Errorf("client ID is required. Set via --client-id flag or MONZO_CLIENT_ID environment variable")
+		return fmt.Errorf("client ID is required. Set via --client-id flag, MONZO_CLIENT_ID environment variable, or config file (~/.go-monzo/config.json)")
 	}
 
 	if clientSecret == "" {
-		return fmt.Errorf("client secret is required. Set via --client-secret flag or MONZO_CLIENT_SECRET environment variable")
+		return fmt.Errorf("client secret is required. Set via --client-secret flag, MONZO_CLIENT_SECRET environment variable, or config file (~/.go-monzo/config.json)")
 	}
 
 	if redirectURI == "" {
