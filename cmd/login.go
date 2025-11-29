@@ -45,6 +45,12 @@ type TokenResponse struct {
 	UserID       string `json:"user_id"`
 }
 
+// StoredToken represents the token stored on disk with expiration tracking
+type StoredToken struct {
+	TokenResponse
+	ExpiresAt int64 `json:"expires_at"` // Unix timestamp when the token expires
+}
+
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Authenticate with Monzo API",
@@ -238,6 +244,47 @@ func exchangeCodeForToken(clientID, clientSecret, redirectURI, code string) (*To
 	return &token, nil
 }
 
+// RefreshToken uses the refresh token to obtain a new access token
+func RefreshToken(clientID, clientSecret, refreshToken string) (*TokenResponse, error) {
+	data := url.Values{
+		"grant_type":    {"refresh_token"},
+		"client_id":     {clientID},
+		"client_secret": {clientSecret},
+		"refresh_token": {refreshToken},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), tokenExchangeTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", monzoTokenURL, strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errResp map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&errResp); err == nil {
+			return nil, fmt.Errorf("token refresh failed: %v", errResp)
+		}
+		return nil, fmt.Errorf("token refresh failed with status: %d", resp.StatusCode)
+	}
+
+	var token TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&token); err != nil {
+		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	}
+
+	return &token, nil
+}
+
 func saveToken(token *TokenResponse) error {
 	configDir, err := getConfigDir()
 	if err != nil {
@@ -250,7 +297,13 @@ func saveToken(token *TokenResponse) error {
 
 	tokenPath := filepath.Join(configDir, "token.json")
 
-	data, err := json.MarshalIndent(token, "", "  ")
+	// Create stored token with expiration timestamp
+	storedToken := StoredToken{
+		TokenResponse: *token,
+		ExpiresAt:     time.Now().Unix() + int64(token.ExpiresIn),
+	}
+
+	data, err := json.MarshalIndent(storedToken, "", "  ")
 	if err != nil {
 		return err
 	}
