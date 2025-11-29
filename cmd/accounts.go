@@ -82,12 +82,43 @@ func loadToken() (*TokenResponse, error) {
 		return nil, err
 	}
 
-	var token TokenResponse
-	if err := json.Unmarshal(data, &token); err != nil {
+	var storedToken StoredToken
+	if err := json.Unmarshal(data, &storedToken); err != nil {
 		return nil, err
 	}
 
-	return &token, nil
+	// Check if token is expired or about to expire (within 60 seconds buffer)
+	if storedToken.ExpiresAt > 0 && time.Now().Unix() >= storedToken.ExpiresAt-60 {
+		// Token is expired or about to expire, try to refresh
+		if storedToken.RefreshToken == "" {
+			return nil, fmt.Errorf("token expired and no refresh token available")
+		}
+
+		// Get client credentials from environment
+		clientID := os.Getenv("MONZO_CLIENT_ID")
+		clientSecret := os.Getenv("MONZO_CLIENT_SECRET")
+
+		if clientID == "" || clientSecret == "" {
+			return nil, fmt.Errorf("token expired: please set MONZO_CLIENT_ID and MONZO_CLIENT_SECRET environment variables to refresh, or run 'go-monzo login' again")
+		}
+
+		fmt.Println("Token expired, refreshing...")
+
+		newToken, err := RefreshToken(clientID, clientSecret, storedToken.RefreshToken)
+		if err != nil {
+			return nil, fmt.Errorf("failed to refresh token: %w", err)
+		}
+
+		// Save the new token
+		if err := saveToken(newToken); err != nil {
+			return nil, fmt.Errorf("failed to save refreshed token: %w", err)
+		}
+
+		fmt.Println("Token refreshed successfully!")
+		return newToken, nil
+	}
+
+	return &storedToken.TokenResponse, nil
 }
 
 func fetchAccounts(accessToken string) (*AccountsResponse, error) {
