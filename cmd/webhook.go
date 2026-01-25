@@ -238,7 +238,7 @@ func registerWebhook(accessToken, accountID, webhookURL string) (*WebhookRespons
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		// Error from ReadAll is intentionally ignored as we're in an error path
 		// and want to include whatever body content we can read in the error message
 		body, _ := io.ReadAll(resp.Body)
@@ -272,7 +272,7 @@ func deleteWebhook(accessToken, webhookID string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		// Error from ReadAll is intentionally ignored as we're in an error path
 		// and want to include whatever body content we can read in the error message
 		body, _ := io.ReadAll(resp.Body)
