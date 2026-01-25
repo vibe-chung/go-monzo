@@ -83,6 +83,52 @@ This returns a JSON response with balance information including:
 - `currency` - ISO currency code (e.g., "GBP")
 - `spend_today` - Amount spent today in minor units
 
+### Transactions
+
+List transactions for a specific account:
+
+```bash
+# Using flags
+go-monzo transactions --account-id=YOUR_ACCOUNT_ID
+
+# Using environment variables
+export MONZO_ACCOUNT_ID=your_account_id
+go-monzo transactions
+```
+
+This returns a JSON response with transaction history.
+
+### Webhooks
+
+Manage webhooks to receive real-time notifications when transactions occur.
+
+#### List Webhooks
+
+```bash
+# Using flags
+go-monzo webhook list --account-id=YOUR_ACCOUNT_ID
+
+# Using environment variables
+export MONZO_ACCOUNT_ID=your_account_id
+go-monzo webhook list
+```
+
+#### Register a Webhook
+
+```bash
+go-monzo webhook register --account-id=YOUR_ACCOUNT_ID --url=https://example.com/webhook
+```
+
+The webhook URL must use HTTPS. Monzo will POST transaction notifications to this URL.
+
+#### Delete a Webhook
+
+```bash
+go-monzo webhook delete --webhook-id=WEBHOOK_ID
+```
+
+You can get the webhook ID from the `webhook list` command.
+
 ## Configuration
 
 The CLI stores tokens in `~/.go-monzo/token.json`.
