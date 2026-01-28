@@ -129,6 +129,28 @@ go-monzo webhook delete --webhook-id=WEBHOOK_ID
 
 You can get the webhook ID from the `webhook list` command.
 
+## Helper Scripts
+
+The repository includes Python helper scripts in the `scripts/` directory to automate webhook management across all accounts:
+
+### Delete All Webhooks
+
+Delete all existing webhooks for all accounts:
+
+```bash
+python scripts/delete_webhooks.py
+```
+
+### Register Webhooks
+
+Register a webhook URL to all accounts:
+
+```bash
+python scripts/register_webhooks.py https://example.com/webhook
+```
+
+See [scripts/README.md](scripts/README.md) for more details.
+
 ## Configuration
 
 The CLI stores tokens in `~/.go-monzo/token.json`.
