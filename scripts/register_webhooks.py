@@ -21,20 +21,18 @@ Example:
 import json
 import subprocess
 import sys
+from urllib.parse import urlparse
 
 from common import run_command, get_accounts
 
 
 def register_webhook(account_id, webhook_url):
     """Register a webhook for a given account."""
-    try:
-        output = run_command([
-            "go-monzo", "webhook", "register",
-            f"--account-id={account_id}",
-            f"--url={webhook_url}"
-        ])
-    except subprocess.CalledProcessError:
-        raise
+    output = run_command([
+        "go-monzo", "webhook", "register",
+        f"--account-id={account_id}",
+        f"--url={webhook_url}"
+    ])
     
     try:
         data = json.loads(output)
@@ -55,9 +53,17 @@ def main():
     
     webhook_url = sys.argv[1]
     
-    # Validate webhook URL (must be HTTPS)
-    if not webhook_url.startswith("https://"):
-        print("Error: Webhook URL must use HTTPS", file=sys.stderr)
+    # Validate webhook URL (must be HTTPS and well-formed)
+    try:
+        parsed = urlparse(webhook_url)
+        if parsed.scheme != "https":
+            print("Error: Webhook URL must use HTTPS", file=sys.stderr)
+            sys.exit(1)
+        if not parsed.netloc:
+            print("Error: Webhook URL is not well-formed (missing domain)", file=sys.stderr)
+            sys.exit(1)
+    except Exception as e:
+        print(f"Error: Invalid webhook URL: {e}", file=sys.stderr)
         sys.exit(1)
     
     print("=" * 60)
@@ -94,7 +100,7 @@ def main():
                 total_registered += 1
             else:
                 print(f"  ✗ Failed to register webhook (no response data)")
-        except Exception as e:
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
             print(f"  ✗ Failed to register webhook: {e}", file=sys.stderr)
     
     print()

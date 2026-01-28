@@ -90,7 +90,7 @@ def main():
                 delete_webhook(webhook_id)
                 print(f"    ✓ Deleted successfully")
                 total_deleted += 1
-            except Exception as e:
+            except subprocess.CalledProcessError as e:
                 print(f"    ✗ Failed to delete: {e}", file=sys.stderr)
     
     print()
