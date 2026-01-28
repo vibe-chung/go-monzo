@@ -22,45 +22,19 @@ import json
 import subprocess
 import sys
 
-
-def run_command(cmd):
-    """Run a shell command and return the output."""
-    try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print(f"Error running command: {cmd}", file=sys.stderr)
-        print(f"Error output: {e.stderr}", file=sys.stderr)
-        raise
-
-
-def get_accounts():
-    """Fetch all accounts using the go-monzo CLI."""
-    print("Fetching accounts...")
-    output = run_command("go-monzo accounts")
-    
-    try:
-        data = json.loads(output)
-        accounts = data.get("accounts", [])
-        print(f"Found {len(accounts)} account(s)")
-        return accounts
-    except json.JSONDecodeError as e:
-        print(f"Error parsing accounts JSON: {e}", file=sys.stderr)
-        print(f"Output was: {output}", file=sys.stderr)
-        sys.exit(1)
+from common import run_command, get_accounts
 
 
 def register_webhook(account_id, webhook_url):
     """Register a webhook for a given account."""
-    output = run_command(
-        f"go-monzo webhook register --account-id={account_id} --url={webhook_url}"
-    )
+    try:
+        output = run_command([
+            "go-monzo", "webhook", "register",
+            f"--account-id={account_id}",
+            f"--url={webhook_url}"
+        ])
+    except subprocess.CalledProcessError:
+        raise
     
     try:
         data = json.loads(output)

@@ -19,43 +19,15 @@ import json
 import subprocess
 import sys
 
-
-def run_command(cmd):
-    """Run a shell command and return the output."""
-    try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print(f"Error running command: {cmd}", file=sys.stderr)
-        print(f"Error output: {e.stderr}", file=sys.stderr)
-        sys.exit(1)
-
-
-def get_accounts():
-    """Fetch all accounts using the go-monzo CLI."""
-    print("Fetching accounts...")
-    output = run_command("go-monzo accounts")
-    
-    try:
-        data = json.loads(output)
-        accounts = data.get("accounts", [])
-        print(f"Found {len(accounts)} account(s)")
-        return accounts
-    except json.JSONDecodeError as e:
-        print(f"Error parsing accounts JSON: {e}", file=sys.stderr)
-        print(f"Output was: {output}", file=sys.stderr)
-        sys.exit(1)
+from common import run_command, get_accounts
 
 
 def get_webhooks(account_id):
     """Fetch all webhooks for a given account."""
-    output = run_command(f"go-monzo webhook list --account-id={account_id}")
+    try:
+        output = run_command(["go-monzo", "webhook", "list", f"--account-id={account_id}"])
+    except subprocess.CalledProcessError:
+        return []
     
     try:
         data = json.loads(output)
@@ -69,7 +41,7 @@ def get_webhooks(account_id):
 
 def delete_webhook(webhook_id):
     """Delete a webhook by ID."""
-    run_command(f"go-monzo webhook delete --webhook-id={webhook_id}")
+    run_command(["go-monzo", "webhook", "delete", f"--webhook-id={webhook_id}"])
 
 
 def main():
